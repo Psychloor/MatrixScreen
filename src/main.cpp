@@ -3,10 +3,13 @@
 #include <ostream>
 #include <vector>
 
-#include "matrix_renderer.hpp"
 #include "SDL3/SDL_main.h"
 
 #include "SDL3/SDL.h"
+
+#include "matrix_renderer.hpp"
+
+static constinit float MOUSE_THRESHOLD = 10.0F;
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
@@ -27,7 +30,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
     std::cout << "Found " << displayCount << " displays\n";
     std::cout << std::flush;
 
-    std::vector<MatrixRenderer> renderers {};
+    std::vector<MatrixRenderer> renderers{};
     for (int i = 0; i < displayCount; ++i)
     {
         SDL_Rect rect;
@@ -57,7 +60,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
     double accumulator = 0.0f;
     double lastTime = static_cast<double>(SDL_GetPerformanceCounter());
-    
+
     while (running)
     {
         SDL_Event event;
@@ -65,25 +68,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
         {
             switch (event.type)
             {
-                case SDL_EVENT_QUIT:
-                    running = false;
+                case SDL_EVENT_QUIT: running = false;
                     break;
 
-                    case SDL_EVENT_KEY_DOWN:
-                    if (event.key.key == SDLK_ESCAPE)
+                case SDL_EVENT_KEY_DOWN: if (event.key.key == SDLK_ESCAPE)
                     {
                         running = false;
                     }
                     break;
 
-                case SDL_EVENT_MOUSE_MOTION:
-                    if (std::abs(event.motion.xrel) > 10 || std::abs(event.motion.yrel) > 10)
+                case SDL_EVENT_MOUSE_MOTION: if (std::abs(event.motion.xrel) > MOUSE_THRESHOLD || std::abs(
+                        event.motion.yrel) > MOUSE_THRESHOLD)
                     {
                         running = false;
                     }
                     break;
 
-                    default: break;
+                default: break;
             }
         }
 
@@ -106,7 +107,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
             renderer.render();
         }
     }
-    
+
 
     SDL_Quit();
     return EXIT_SUCCESS;

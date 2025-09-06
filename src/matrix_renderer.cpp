@@ -7,6 +7,7 @@
 #include <iostream>
 
 MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displayId) :
+    bounds_(bounds),
     window_{nullptr, SDL_DestroyWindow},
     renderer_{nullptr, SDL_DestroyRenderer}
 {
@@ -16,7 +17,7 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displ
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, bounds.x);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, bounds.y);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER,
-                         SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN);
+                          SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN);
 
     window_ = SdlWindowPtr(SDL_CreateWindowWithProperties(props), SDL_DestroyWindow);
     SDL_DestroyProperties(props);
@@ -40,6 +41,11 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displ
     SDL_SetWindowAlwaysOnTop(window_.get(), true);
 
     renderer_ = SdlRendererPtr(SDL_CreateRenderer(window_.get(), nullptr), SDL_DestroyRenderer);
+    if (!renderer_)
+    {
+        std::cerr << "SDL_CreateRenderer failed: " << SDL_GetError() << '\n' << std::flush;
+        return;
+    }
 
     valid_ = true;
 }
@@ -51,9 +57,7 @@ MatrixRenderer::~MatrixRenderer()
 }
 
 void MatrixRenderer::update(double deltaTime)
-{
-
-}
+{}
 
 void MatrixRenderer::render()
 {

@@ -10,7 +10,7 @@ using SdlRendererPtr = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRender
 
 class MatrixRenderer
 {
-    public:
+public:
     explicit MatrixRenderer(const SDL_Rect& bounds, SDL_DisplayID displayId);
     ~MatrixRenderer();
 
@@ -26,6 +26,8 @@ class MatrixRenderer
 
 private:
     bool valid_ = false;
+    SDL_Rect bounds_;
+
     SdlWindowPtr window_;
     SdlRendererPtr renderer_;
 };
