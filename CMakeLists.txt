@@ -52,7 +52,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 # Post-build: rename to .scr
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:${PROJECT_NAME}>"
         "${CMAKE_BINARY_DIR}/MatrixScreensaver.scr"
 )
