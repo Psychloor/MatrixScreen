@@ -6,6 +6,8 @@
 
 #include <SDL3/SDL.h>
 
+#include "matrix_screensaver.hpp"
+
 using SdlWindowPtr = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 using SdlRendererPtr = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)>;
 
@@ -13,6 +15,7 @@ class MatrixRenderer
 {
 public:
     explicit MatrixRenderer(const SDL_Rect& bounds, SDL_DisplayID displayId);
+    explicit MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow);
     ~MatrixRenderer();
 
     void update(double deltaTime, std::mt19937& gen);

@@ -13,10 +13,12 @@ endif ()
 set(SOURCES
         src/main.cpp
         src/matrix_renderer.cpp
+        src/matrix_screensaver.cpp
 )
 
 set(HEADERS
         src/matrix_renderer.hpp
+        src/matrix_screensaver.hpp
 )
 
 # Create executable

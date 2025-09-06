@@ -18,7 +18,7 @@ namespace
     // @formatter:on
 }
 
-MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displayId) :
+MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID  /*displayId*/) :
     bounds_(bounds),
     window_{nullptr, SDL_DestroyWindow},
     renderer_{nullptr, SDL_DestroyRenderer}
@@ -49,6 +49,32 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displ
     }
 
     valid_ = true;
+}
+
+MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow) :
+    bounds_(bounds),
+    window_{nullptr, SDL_DestroyWindow},
+    renderer_{nullptr, SDL_DestroyRenderer}
+{
+    window_ = SdlWindowPtr(SDL_CreateWindow(nullptr, bounds.w, bounds.h, SDL_WINDOW_BORDERLESS), SDL_DestroyWindow);
+    if (!window_)
+    {
+        std::cerr << "SDL_CreateWindow failed: " << SDL_GetError() << '\n' << std::flush;
+        return;
+    }
+
+    SDL_Window* parentWindow = SDL_GetWindowFromID(reinterpret_cast<SDL_WindowID>(previewWindow));
+    SDL_SetWindowParent(window_.get(), parentWindow);
+    SDL_ShowWindow(window_.get());
+
+    renderer_ = SdlRendererPtr(SDL_CreateRenderer(window_.get(), nullptr), SDL_DestroyRenderer);
+    if (!renderer_)
+    {
+        std::cerr << "SDL_CreateRenderer failed: " << SDL_GetError() << '\n' << std::flush;
+        return;
+    }
+
+    SDL_SetWindowAlwaysOnTop(window_.get(), true);
 }
 
 MatrixRenderer::~MatrixRenderer()
