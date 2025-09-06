@@ -49,16 +49,16 @@ private:
     // --- Matrix rain state ---
     struct Stream
     {
-        float y;          // head Y (pixels)
-        float speed;      // pixels/sec
-        int length;       // number of glyphs in stream
+        float y;     // head Y (pixels)
+        float speed; // pixels/sec
+        int length;  // number of glyphs in stream
         std::vector<MatrixCharacter> chars;
     };
 
     // Grid / layout
     int cellW_ = 16;
     int cellH_ = 24;
-    int cols_  = 0;
+    int cols_ = 0;
 
     // Streams (one per column)
     std::vector<Stream> streams_;

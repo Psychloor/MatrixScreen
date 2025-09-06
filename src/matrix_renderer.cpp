@@ -675,26 +675,29 @@ bool MatrixRenderer::isValid() const
 }
 
 MatrixRenderer::MatrixRenderer(MatrixRenderer&& other) noexcept :
-valid_(other.valid_),
-bounds_(other.bounds_),
-characterDistribution_(other.characterDistribution_),
-window_(std::move(other.window_)),
-renderer_(std::move(other.renderer_)),
-cellW_(other.cellW_),
-cellH_(other.cellH_),
-cols_(other.cols_),
-streams_(std::move(other.streams_)),
-speedDist_(other.speedDist_),
-lengthDist_(other.lengthDist_),
-font_(other.font_),
-glyphCache_(std::move(other.glyphCache_))
-{    // Clear the moved-from object
+    valid_(other.valid_),
+    bounds_(other.bounds_),
+    characterDistribution_(other.characterDistribution_),
+    window_(std::move(other.window_)),
+    renderer_(std::move(other.renderer_)),
+    cellW_(other.cellW_),
+    cellH_(other.cellH_),
+    cols_(other.cols_),
+    streams_(std::move(other.streams_)),
+    speedDist_(other.speedDist_),
+    lengthDist_(other.lengthDist_),
+    font_(other.font_),
+    glyphCache_(std::move(other.glyphCache_))
+{
+    // Clear the moved-from object
     other.font_ = nullptr;
-    other.valid_ = false;}
+    other.valid_ = false;
+}
 
 MatrixRenderer& MatrixRenderer::operator=(MatrixRenderer&& other) noexcept
 {
-    if (this == &other) return *this;
+    if (this == &other)
+        return *this;
 
     // Clean up existing resources
     glyphCache_.clear();
