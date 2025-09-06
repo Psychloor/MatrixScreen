@@ -49,9 +49,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
     }
     SDL_free(displayIds);
 
-    const double FREQUENCY = static_cast<double>(SDL_GetPerformanceFrequency());
-    constexpr double FPS = 60.0f;
-    constexpr double TIMESTEP = 1.0f / FPS;
+    const double frequency = static_cast<double>(SDL_GetPerformanceFrequency());
+    constexpr double fps = 60.0f;
+    constexpr double timestep = 1.0f / fps;
 
     bool running = true;
 
@@ -63,23 +63,41 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_EVENT_QUIT)
+            switch (event.type)
             {
-                running = false;
+                case SDL_EVENT_QUIT:
+                    running = false;
+                    break;
+
+                    case SDL_EVENT_KEY_DOWN:
+                    if (event.key.key == SDLK_ESCAPE)
+                    {
+                        running = false;
+                    }
+                    break;
+
+                case SDL_EVENT_MOUSE_MOTION:
+                    if (std::abs(event.motion.xrel) > 10 || std::abs(event.motion.yrel) > 10)
+                    {
+                        running = false;
+                    }
+                    break;
+
+                    default: break;
             }
         }
 
         const double currentTime = static_cast<double>(SDL_GetPerformanceCounter());
-        const double deltaTime = (currentTime - lastTime) / FREQUENCY;
+        const double deltaTime = (currentTime - lastTime) / frequency;
         lastTime = currentTime;
 
         accumulator += std::min(deltaTime, 0.25);
-        while (accumulator >= TIMESTEP)
+        while (accumulator >= timestep)
         {
-            accumulator -= TIMESTEP;
+            accumulator -= timestep;
             for (auto& renderer : renderers)
             {
-                renderer.update(TIMESTEP);
+                renderer.update(timestep);
             }
         }
 

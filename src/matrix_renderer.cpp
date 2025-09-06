@@ -34,12 +34,8 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displ
         std::cerr << "SDL_SetWindowSize failed: " << SDL_GetError() << '\n' << std::flush;
         return;
     }
-   /* if (!SDL_ShowWindow(window_.get()))
-    {
-        std::cerr << "SDL_ShowWindow failed: " << SDL_GetError() << '\n' << std::flush;
-        return;
-    }*/
-    //SDL_SetWindowAlwaysOnTop(window_.get(), true);
+
+    SDL_SetWindowAlwaysOnTop(window_.get(), true);
 
     renderer_ = SdlRendererPtr(SDL_CreateRenderer(window_.get(), nullptr), SDL_DestroyRenderer);
 
