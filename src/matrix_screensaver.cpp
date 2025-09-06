@@ -6,11 +6,13 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
 #include <ostream>
 #include <random>
 #include <vector>
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "matrix_renderer.hpp"
 
@@ -38,6 +40,14 @@ int MatrixScreensaver::runScreensaver()
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
+        std::cerr << "SDL_Init failed: " << SDL_GetError() << '\n' << std::flush;
+        return -1;
+    }
+
+    if (!TTF_Init())
+    {
+        std::cerr << "TTF_Init failed: " << SDL_GetError() << '\n' << std::flush;
+        SDL_Quit();
         return -1;
     }
 
@@ -71,11 +81,20 @@ int MatrixScreensaver::runPreview()
 {
     if (previewWindow_ == nullptr)
     {
+        std::cerr << "Preview window handle is null" << '\n' << std::flush;
         return -1;
     }
 
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
+        std::cerr << "SDL_Init failed: " << SDL_GetError() << '\n' << std::flush;
+        return -1;
+    }
+
+    if (!TTF_Init())
+    {
+        std::cerr << "TTF_Init failed: " << SDL_GetError() << '\n' << std::flush;
+        SDL_Quit();
         return -1;
     }
 

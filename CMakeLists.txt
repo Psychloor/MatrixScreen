@@ -4,11 +4,6 @@ project(MatrixScreensaver VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Windows-specific settings
-if (WIN32)
-    add_definitions(-DWIN32_LEAN_AND_MEAN)
-endif ()
-
 # Source files
 set(SOURCES
         src/main.cpp
@@ -25,9 +20,15 @@ set(HEADERS
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
-find_package(SDL3 CONFIG REQUIRED)
+if (WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE WIN32_LEAN_AND_MEAN)
+endif ()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
+find_package(SDL3 CONFIG REQUIRED)
+find_package(SDL3_ttf CONFIG REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3)
+
 
 # Compiler-specific options
 if (MSVC)

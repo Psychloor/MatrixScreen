@@ -16,6 +16,7 @@ namespace
         L"メ", L"モ", L"ヤ", L"ユ", L"ヨ", L"ラ", L"リ", L"ル", L"レ", L"ロ", L"ワ", L"ヲ", L"ン",L"0",
         L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9",L"A",L"B",L"C"});
     // @formatter:on
+    constexpr size_t MATRIX_CHARS_SIZE = MATRIX_CHARS.size();
 }
 
 MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID  /*displayId*/) :
@@ -48,6 +49,7 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID  /*di
         return;
     }
 
+    characterDistribution_ = std::uniform_int_distribution<size_t>(0, MATRIX_CHARS_SIZE - 1);
     valid_ = true;
 }
 
@@ -75,6 +77,8 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow) :
     }
 
     SDL_SetWindowAlwaysOnTop(window_.get(), true);
+    characterDistribution_ = std::uniform_int_distribution<size_t>(0, MATRIX_CHARS_SIZE - 1);
+    valid_ = true;
 }
 
 MatrixRenderer::~MatrixRenderer()
@@ -104,7 +108,8 @@ MatrixRenderer::MatrixRenderer(MatrixRenderer&& other) noexcept :
     valid_(other.valid_),
     window_(std::move(other.window_)),
     renderer_(std::move(other.renderer_))
-{}
+{
+}
 
 MatrixRenderer& MatrixRenderer::operator=(MatrixRenderer&& other) noexcept
 {

@@ -11,6 +11,12 @@
 using SdlWindowPtr = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 using SdlRendererPtr = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)>;
 
+struct MatrixCharacter
+{
+    wchar_t character;
+    float age;
+};
+
 class MatrixRenderer
 {
 public:
@@ -31,6 +37,7 @@ public:
 private:
     bool valid_ = false;
     SDL_Rect bounds_;
+    std::uniform_int_distribution<size_t> characterDistribution_;
 
     SdlWindowPtr window_;
     SdlRendererPtr renderer_;
