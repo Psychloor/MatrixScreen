@@ -87,8 +87,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
                     }
                     break;
 
-                case SDL_EVENT_MOUSE_MOTION: if (std::abs(event.motion.xrel) > MOUSE_THRESHOLD || std::abs(
-                        event.motion.yrel) > MOUSE_THRESHOLD)
+                case SDL_EVENT_MOUSE_MOTION: if (std::abs(event.motion.xrel) >= MOUSE_THRESHOLD || std::abs(
+                        event.motion.yrel) >= MOUSE_THRESHOLD)
                     {
                         running = false;
                     }
