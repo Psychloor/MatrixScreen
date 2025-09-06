@@ -20,7 +20,7 @@ set(HEADERS
 )
 
 # Create executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
 find_package(SDL3 CONFIG REQUIRED)

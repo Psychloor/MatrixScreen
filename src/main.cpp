@@ -16,7 +16,7 @@ static constinit size_t RANDOM_SEED_SIZE = 16;
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
-    SDL_SetAppMetadata("Matrix Screensaver", "1.0.0", "com.shizzle.matrixscreensaver");
+    SDL_SetAppMetadata("Matrix Screensaver", "1.0.0", "com.matrix-screensaver");
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         std::cerr << "SDL_Init failed: " << SDL_GetError() << '\n' << std::flush;
