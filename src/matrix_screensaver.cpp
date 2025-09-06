@@ -129,6 +129,11 @@ int MatrixScreensaver::mainLoop()
 
     std::mt19937 gen(seq);
 
+    for (auto&& renderer : renderers_)
+    {
+        renderer.setupStreams(gen);
+    }
+
     while (running_)
     {
         SDL_Event event;

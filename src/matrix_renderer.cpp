@@ -150,9 +150,6 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID /*dis
     initFontIfPossible(); // sets cellW_/cellH_ and font_ if available
     std::cerr << "Font status (primary path): " << (font_ ? "loaded" : "not loaded, using rectangles") << '\n';
 
-    std::mt19937 gen{std::random_device{}()};
-    setupStreams(gen);
-
     valid_ = true;
 }
 
@@ -190,9 +187,6 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow) :
 
     initFontIfPossible();
     std::cerr << "Font status (preview path): " << (font_ ? "loaded" : "not loaded, using rectangles") << '\n';
-
-    std::mt19937 gen{std::random_device{}()};
-    setupStreams(gen);
 
     valid_ = true;
 }
@@ -473,7 +467,7 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
         targetFormat = SDL_PIXELFORMAT_RGBA32;
     }
 
-    // 3) Convert surface to renderer-appropriate format
+    // 3) Convert surface to the renderer-appropriate format
     SDL_Surface* conv = SDL_ConvertSurface(surf, targetFormat);
     if (!conv)
     {
@@ -511,10 +505,6 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
     SDL_DestroySurface(conv);
 
     SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-
-    // Log successful texture creation for debugging
-    std::cerr << "Successfully created glyph texture for '" << u8 << "' on renderer " << driverName << '\n';
-
     return SdlTexturePtr(tex, SDL_DestroyTexture);
 }
 

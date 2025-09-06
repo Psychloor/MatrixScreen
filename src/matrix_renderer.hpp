@@ -39,6 +39,8 @@ public:
     MatrixRenderer& operator=(MatrixRenderer&& other) noexcept;
 
 private:
+    friend class MatrixScreensaver;
+
     bool valid_ = false;
     SDL_Rect bounds_;
     std::uniform_int_distribution<size_t> characterDistribution_;
