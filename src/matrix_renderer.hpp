@@ -2,6 +2,7 @@
 #define MATRIXSCREENSAVER_MATRIX_RENDERER_HPP
 
 #include <memory>
+#include <random>
 
 #include <SDL3/SDL.h>
 
@@ -14,7 +15,7 @@ public:
     explicit MatrixRenderer(const SDL_Rect& bounds, SDL_DisplayID displayId);
     ~MatrixRenderer();
 
-    void update(double deltaTime);
+    void update(double deltaTime, std::mt19937& gen);
     void render();
 
     [[nodiscard]] bool isValid() const;

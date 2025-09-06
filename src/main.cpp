@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <random>
 
 #include "SDL3/SDL_main.h"
 
@@ -61,6 +62,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
     double accumulator = 0.0f;
     double lastTime = static_cast<double>(SDL_GetPerformanceCounter());
 
+    std::random_device rd;
+    std::vector<std::seed_seq::result_type> seeds(std::mt19937::state_size);
+    std::generate_n(std::begin(seeds), std::mt19937::state_size, std::ref(rd));
+    std::seed_seq seq(std::begin(seeds), std::end(seeds));
+
+    std::mt19937 gen(seq);
+
     while (running)
     {
         SDL_Event event;
@@ -98,7 +106,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
             accumulator -= timestep;
             for (auto& renderer : renderers)
             {
-                renderer.update(timestep);
+                renderer.update(timestep, gen);
             }
         }
 

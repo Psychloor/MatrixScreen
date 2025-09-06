@@ -45,7 +45,7 @@ MatrixRenderer::~MatrixRenderer()
     window_.reset();
 }
 
-void MatrixRenderer::update(double deltaTime)
+void MatrixRenderer::update(double deltaTime, std::mt19937& gen)
 {}
 
 void MatrixRenderer::render()
