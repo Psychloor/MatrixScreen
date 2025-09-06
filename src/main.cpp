@@ -14,6 +14,9 @@ static constinit float MOUSE_THRESHOLD = 10.0F;
 // 16 should be random enough compared to 'std::mt19937::state_size' 624
 static constinit size_t RANDOM_SEED_SIZE = 16;
 
+static constexpr double FPS = 60.0f;
+static constexpr double TIMESTEP = 1.0f / FPS;
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
     SDL_SetAppMetadata("Matrix Screensaver", "1.0.0", "com.matrix-screensaver");
@@ -56,8 +59,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
     SDL_free(displayIds);
 
     const double frequency = static_cast<double>(SDL_GetPerformanceFrequency());
-    constexpr double fps = 60.0f;
-    constexpr double timestep = 1.0f / fps;
 
     bool running = true;
 
@@ -103,12 +104,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
         lastTime = currentTime;
 
         accumulator += std::min(deltaTime, 0.25);
-        while (accumulator >= timestep)
+        while (accumulator >= TIMESTEP)
         {
-            accumulator -= timestep;
+            accumulator -= TIMESTEP;
             for (auto& renderer : renderers)
             {
-                renderer.update(timestep, gen);
+                renderer.update(TIMESTEP, gen);
             }
         }
 
