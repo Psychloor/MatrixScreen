@@ -5,17 +5,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Windows-specific settings
-if(WIN32)
+if (WIN32)
     add_definitions(-DWIN32_LEAN_AND_MEAN)
-endif()
+endif ()
 
 # Source files
 set(SOURCES
-    src/main.cpp
+        src/main.cpp
+        src/matrix_renderer.cpp
 )
 
 set(HEADERS
-
+        src/matrix_renderer.hpp
 )
 
 # Create executable
@@ -27,11 +28,11 @@ find_package(SDL3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 
 # Compiler-specific options
-if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE 
-        /W3 /permissive- /Zc:__cplusplus /utf-8
+if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+            /W3 /permissive- /Zc:__cplusplus /utf-8
     )
-endif()
+endif ()
 
 # Set output name to .scr for screensaver
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "MatrixScreensaver")
@@ -48,7 +49,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 # Post-build: rename to .scr
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy 
-    "$<TARGET_FILE:${PROJECT_NAME}>" 
-    "${CMAKE_BINARY_DIR}/MatrixScreensaver.scr"
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "$<TARGET_FILE:${PROJECT_NAME}>"
+        "${CMAKE_BINARY_DIR}/MatrixScreensaver.scr"
 )
