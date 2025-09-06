@@ -19,7 +19,7 @@ namespace
     constexpr size_t MATRIX_CHARS_SIZE = MATRIX_CHARS.size();
 }
 
-MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID  /*displayId*/) :
+MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID /*displayId*/) :
     bounds_(bounds),
     window_{nullptr, SDL_DestroyWindow},
     renderer_{nullptr, SDL_DestroyRenderer}
@@ -108,8 +108,7 @@ MatrixRenderer::MatrixRenderer(MatrixRenderer&& other) noexcept :
     valid_(other.valid_),
     window_(std::move(other.window_)),
     renderer_(std::move(other.renderer_))
-{
-}
+{}
 
 MatrixRenderer& MatrixRenderer::operator=(MatrixRenderer&& other) noexcept
 {

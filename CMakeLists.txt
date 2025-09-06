@@ -7,7 +7,6 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
 # Ensure CMAKE_MSVC_RUNTIME_LIBRARY is honored (CMake 3.15+)
 cmake_policy(SET CMP0091 NEW)
 
-
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -31,21 +30,22 @@ if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE WIN32_LEAN_AND_MEAN)
 endif ()
 
+# Include submodules
 add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/SDL_ttf)
 
 # Prefer static SDL targets if available, else fall back
 if (TARGET SDL3::SDL3-static)
     set(SDL3_MAIN_TARGET SDL3::SDL3-static)
-else()
+else ()
     set(SDL3_MAIN_TARGET SDL3::SDL3)
-endif()
+endif ()
 
 if (TARGET SDL3_ttf::SDL3_ttf-static)
     set(SDL3_TTF_TARGET SDL3_ttf::SDL3_ttf-static)
-else()
+else ()
     set(SDL3_TTF_TARGET SDL3_ttf::SDL3_ttf)
-endif()
+endif ()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL3_TTF_TARGET} ${SDL3_MAIN_TARGET})
 
@@ -53,7 +53,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL3_TTF_TARGET} ${SDL3_MAIN_TAR
 # Compiler-specific options
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W3 /permissive- /Zc:__cplusplus /utf-8)
-else()
+else ()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()
 
@@ -69,7 +69,7 @@ if (BUILD_SHARED_LIBS)
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
             COMMAND_EXPAND_LISTS
     )
-endif()
+endif ()
 
 
 # Post-build: rename to .scr
