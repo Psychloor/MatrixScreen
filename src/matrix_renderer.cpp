@@ -50,6 +50,7 @@ void MatrixRenderer::update(double deltaTime)
 
 void MatrixRenderer::render()
 {
+    SDL_SetRenderDrawColor(renderer_.get(), 0, 0, 0, 255);
     SDL_RenderClear(renderer_.get());
 
 
