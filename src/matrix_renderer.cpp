@@ -24,14 +24,14 @@ namespace
 {
     // Character set kept for potential future use (e.g., switching glyphs over time).
     // We don't render text here (SDL_ttf-free); we draw rectangles for speed/compat.
-    constinit auto MATRIX_CHARS = std::to_array({L"ア", L"イ", L"ウ", L"エ", L"オ",
+    constexpr auto MATRIX_CHARS = std::to_array({L"ア", L"イ", L"ウ", L"エ", L"オ",
         L"カ", L"キ", L"ク", L"ケ", L"コ", L"サ", L"シ", L"ス", L"セ", L"ソ",L"タ", L"チ", L"ツ", L"テ",
         L"ト", L"ナ", L"ニ", L"ヌ", L"ネ", L"ノ", L"ハ", L"ヒ", L"フ", L"ヘ", L"ホ",L"マ", L"ミ", L"ム",
         L"メ", L"モ", L"ヤ", L"ユ", L"ヨ", L"ラ", L"リ", L"ル", L"レ", L"ロ", L"ワ", L"ヲ", L"ン",L"0",
         L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9",L"A",L"B",L"C"});
     constexpr size_t MATRIX_CHARS_SIZE = MATRIX_CHARS.size();
 
-    inline std::string wchar_to_utf8(const wchar_t wc)
+    std::string wchar_to_utf8(const wchar_t wc)
     {
     #ifdef _WIN32
         wchar_t wbuf[2] = { wc, 0 };
@@ -157,17 +157,29 @@ MatrixRenderer::~MatrixRenderer()
 }
 
 // Simulation setup and helpers
+
+// Helper: choose a per-monitor font size based on window height.
+// Aim for about 50 rows; clamp to a sane range.
+static int choose_font_pt_for_bounds(int height_px)
+{
+    const int rows = 50; // tune to taste (40..60)
+    const int target_cell_h = std::max(12, height_px / rows);
+    // Use target cell height directly as a point-size heuristic (works well in practice).
+    return std::clamp(target_cell_h, 12, 64);
+}
+
 void MatrixRenderer::initFontIfPossible()
 {
-    // 1) Try a bundled font first for deterministic behavior.
-    // Place a CJK-capable font (e.g., NotoSansCJK-Regular.ttc) in a "fonts" folder next to the .scr
-    auto base = SDL_GetBasePath();
+    const int pt = choose_font_pt_for_bounds(bounds_.h);
+
+    // 1) Try bundled font first
+    const char* base = SDL_GetBasePath();
     if (base)
     {
         try
         {
             std::filesystem::path p(base);
-            //SDL_free((void*)base);
+            //SDL_free(base);
             p /= "fonts";
 #ifdef _WIN32
             p /= "NotoSansCJK-Regular.ttc";
@@ -176,47 +188,44 @@ void MatrixRenderer::initFontIfPossible()
 #endif
             if (std::filesystem::exists(p))
             {
-                if (TTF_Font* f = TTF_OpenFont(p.string().c_str(), 22))
+                if (TTF_Font* f = TTF_OpenFont(p.string().c_str(), pt))
                 {
                     font_ = f;
-                    std::cerr << "Loaded bundled font: " << p.string() << '\n';
+                    std::cerr << "Loaded bundled font: " << p.string() << " pt=" << pt << '\n';
 
-                    int minx, maxx, miny, maxy, advance;
-                    if (TTF_GetGlyphMetrics(f, static_cast<Uint32>('M'), &minx, &maxx, &miny, &maxy, &advance) == 0)
+                    const int lineSkip = TTF_GetFontLineSkip(f);
+                    if (lineSkip > 0)
                     {
-                        cellW_ = std::max(advance, maxx - minx);
-                        cellH_ = std::max(TTF_GetFontLineSkip(f), maxy - miny);
+                        cellH_ = lineSkip;
+                        cellW_ = std::max(12, lineSkip * 2 / 3);
                     }
                     else
                     {
                         cellW_ = 16;
                         cellH_ = 24;
-                        std::cerr << "TTF_GetGlyphMetrics failed on bundled font, using defaults.\n";
+                        std::cerr << "TTF_GetFontLineSkip failed; using defaults. Error: " << SDL_GetError() << '\n';
                     }
                     return;
                 }
                 else
                 {
-                    std::cerr << "TTF_OpenFont failed bundled font: " << p.string() << " error=" << SDL_GetError() << '\n';
+                    std::cerr << "TTF_OpenFont failed (bundled): " << p.string() << " error=" << SDL_GetError() << '\n';
                 }
             }
         }
-        catch (...)
-        {
-            // Ignore base path issues; will try system fonts next.
-            //SDL_free(base); // in case of exception before free (defensive)
-        }
+        catch (...) { /* fall through to system fonts */ }
     }
 
 #ifdef _WIN32
-    // 2) System fonts: primary + CJK fallbacks
     const char* primaryCandidates[] = {
-        "C:/Windows/Fonts/consola.ttf", // Consolas
-        "C:/Windows/Fonts/segoeui.ttf"  // Segoe UI
+        "C:/Windows/Fonts/consola.ttf",
+        "C:/Windows/Fonts/segoeui.ttf"
     };
     const char* cjkFallbacks[] = {
         "C:/Windows/Fonts/meiryo.ttc",
+        "C:/Windows/Fonts/meiryob.ttc",
         "C:/Windows/Fonts/YuGothM.ttc",
+        "C:/Windows/Fonts/YuGothR.ttc",
         "C:/Windows/Fonts/msgothic.ttc",
         "C:/Windows/Fonts/msmincho.ttc"
     };
@@ -233,9 +242,9 @@ void MatrixRenderer::initFontIfPossible()
     TTF_Font* primary = nullptr;
     for (const char* path : primaryCandidates)
     {
-        if ((primary = TTF_OpenFont(path, 22)))
+        if ((primary = TTF_OpenFont(path, pt)))
         {
-            std::cerr << "Loaded primary system font: " << path << '\n';
+            std::cerr << "Loaded primary system font: " << path << " pt=" << pt << '\n';
             break;
         }
         else
@@ -249,23 +258,22 @@ void MatrixRenderer::initFontIfPossible()
         font_ = nullptr;
         cellW_ = 16;
         cellH_ = 24;
-        std::cerr << "No system primary font. Falling back to rectangles.\n";
+        std::cerr << "No primary font. Falling back to rectangles.\n";
         return;
     }
 
-    // Add CJK fallbacks (best-effort)
     for (const char* path : cjkFallbacks)
     {
-        if (TTF_Font* fb = TTF_OpenFont(path, 22))
+        if (TTF_Font* fb = TTF_OpenFont(path, pt))
         {
             if (TTF_AddFallbackFont(primary, fb) == 0)
             {
-                std::cerr << "Added CJK fallback: " << path << '\n';
+                std::cerr << "Added CJK fallback: " << path << " pt=" << pt << '\n';
             }
             else
             {
                 std::cerr << "TTF_AddFallbackFont failed for: " << path << " error=" << SDL_GetError() << '\n';
-                TTF_CloseFont(fb); // avoid leak if not attached
+                TTF_CloseFont(fb);
             }
         }
         else
@@ -276,19 +284,74 @@ void MatrixRenderer::initFontIfPossible()
 
     font_ = primary;
 
-    // Compute cell size
-    int minx, maxx, miny, maxy, advance;
-    if (TTF_GetGlyphMetrics(primary, static_cast<Uint32>('M'), &minx, &maxx, &miny, &maxy, &advance) == 0)
+    const int lineSkip = TTF_GetFontLineSkip(primary);
+    if (lineSkip > 0)
     {
-        cellW_ = std::max(advance, maxx - minx);
-        cellH_ = std::max(TTF_GetFontLineSkip(primary), maxy - miny);
+        cellH_ = lineSkip;
+        cellW_ = std::max(12, lineSkip * 2 / 3);
     }
     else
     {
         cellW_ = 16;
         cellH_ = 24;
-        std::cerr << "TTF_GetGlyphMetrics failed on system font, using defaults.\n";
+        std::cerr << "TTF_GetFontLineSkip failed; using defaults. Error: " << SDL_GetError() << '\n';
     }
+}
+
+// Render a single codepoint as a texture, with explicit format normalization.
+SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/)
+{
+    if (font_ == nullptr)
+    {
+        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+    }
+
+    // Convert the single codepoint to UTF-8 text (SDL3_ttf text API is stable).
+#ifdef _WIN32
+    wchar_t wbuf[2] = { ch, 0 };
+    int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
+    if (len <= 0)
+    {
+        std::cerr << "WideCharToMultiByte failed for wchar: " << static_cast<unsigned>(ch) << '\n';
+        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+    }
+    std::string u8(static_cast<size_t>(len), '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, u8.data(), len, nullptr, nullptr);
+    if (!u8.empty() && u8.back() == '\0') u8.pop_back();
+#else
+    std::string u8 = (ch < 128) ? std::string(1, static_cast<char>(ch)) : std::string("?");
+#endif
+
+    // 1) Render text to an SDL_Surface via SDL3_ttf
+    SDL_Surface* surf = TTF_RenderText_Blended(static_cast<TTF_Font*>(font_), u8.c_str(), 0, SDL_Color{255, 255, 255, 255});
+    if (!surf)
+    {
+        std::cerr << "TTF_RenderText_Blended failed for '" << u8 << "': " << SDL_GetError() << '\n';
+        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+    }
+
+    // 2) Normalize to a texture-friendly format (fixes D3D11 picky paths)
+    SDL_Surface* conv = SDL_ConvertSurface(surf, SDL_PIXELFORMAT_RGBA32);
+    if (!conv)
+    {
+        std::cerr << "SDL_ConvertSurfaceFormat to RGBA32 failed: " << SDL_GetError() << '\n';
+        SDL_DestroySurface(surf);
+        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+    }
+    SDL_DestroySurface(surf);
+
+    // 3) Create a texture from the normalized surface
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer_.get(), conv);
+    if (!tex)
+    {
+        std::cerr << "SDL_CreateTextureFromSurface failed (RGBA32): " << SDL_GetError() << '\n';
+        SDL_DestroySurface(conv);
+        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+    }
+    SDL_DestroySurface(conv);
+
+    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+    return SdlTexturePtr(tex, SDL_DestroyTexture);
 }
 
 
@@ -314,36 +377,6 @@ void MatrixRenderer::setupStreams(std::mt19937& gen)
 
         streams_.emplace_back(std::move(s));
     }
-}
-
-// Stubbed glyph rendering API to satisfy header; unused in this SDL_ttf-free version
-SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/)
-{
-    if (font_ == nullptr)
-    {
-        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
-    }
-
-    const std::string u8 = wchar_to_utf8(ch);
-
-    // SDL3_ttf: TTF_RenderText_Blended(font, UTF-8 text, color) — no length param
-    SDL_Surface* surf = TTF_RenderText_Blended(static_cast<TTF_Font*>(font_), u8.c_str(), 0, SDL_Color{255, 255, 255, 255});
-    if (!surf)
-    {
-        std::cerr << "TTF_RenderText_Blended failed for '" << u8 << "' error=" << SDL_GetError() << '\n';
-        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
-    }
-
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer_.get(), surf);
-    SDL_DestroySurface(surf);
-    if (!tex)
-    {
-        std::cerr << "SDL_CreateTextureFromSurface failed: " << SDL_GetError() << '\n';
-        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
-    }
-
-    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-    return SdlTexturePtr(tex, SDL_DestroyTexture);
 }
 
 SDL_Texture* MatrixRenderer::getGlyphTexture(wchar_t ch, SDL_Color color)

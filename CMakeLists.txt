@@ -10,6 +10,8 @@ cmake_policy(SET CMP0091 NEW)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Source files
 set(SOURCES
         src/main.cpp
@@ -71,6 +73,13 @@ if (BUILD_SHARED_LIBS)
     )
 endif ()
 
+# Create fonts directory and copy fonts
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/fonts"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/fonts"
+        "${CMAKE_BINARY_DIR}/fonts"
+)
 
 # Post-build: rename to .scr
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
