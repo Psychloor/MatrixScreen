@@ -10,7 +10,7 @@
 namespace
 {
     // @formatter:off
-    constexpr auto MATRIX_CHARS = std::to_array({L"ア", L"イ", L"ウ", L"エ", L"オ",
+    constinit auto MATRIX_CHARS = std::to_array({L"ア", L"イ", L"ウ", L"エ", L"オ",
         L"カ", L"キ", L"ク", L"ケ", L"コ", L"サ", L"シ", L"ス", L"セ", L"ソ",L"タ", L"チ", L"ツ", L"テ",
         L"ト", L"ナ", L"ニ", L"ヌ", L"ネ", L"ノ", L"ハ", L"ヒ", L"フ", L"ヘ", L"ホ",L"マ", L"ミ", L"ム",
         L"メ", L"モ", L"ヤ", L"ユ", L"ヨ", L"ラ", L"リ", L"ル", L"レ", L"ロ", L"ワ", L"ヲ", L"ン",L"0",
