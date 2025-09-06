@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(MatrixScreensaver VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -19,46 +18,24 @@ endif()
 # Source files
 set(SOURCES
     src/main.cpp
-    src/matrix_screensaver.cpp
-    src/matrix_renderer.cpp
-    src/config_dialog.cpp
-    src/settings_manager.cpp
-    src/mask_loader.cpp
-    src/MatrixScreensaver.rc
 )
 
 set(HEADERS
-    src/matrix_screensaver.h
-    src/matrix_renderer.h
-    src/config_dialog.h
-    src/settings_manager.h
-    src/mask_loader.h
-    src/common.h
-    src/resource.h
+
 )
 
 # Create executable
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
-# Link libraries
-if(WIN32)
-    target_link_libraries(${PROJECT_NAME} 
-        ${DIRECTX_LIBS}
-        comctl32
-        gdi32
-        user32
-        kernel32
-        ole32
-        oleaut32
-        uuid
-        comdlg32
-    )
-endif()
+find_package(SDL3 CONFIG REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 
 # Compiler-specific options
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE 
-        /W3 /permissive- /Zc:__cplusplus
+        /W3 /permissive- /Zc:__cplusplus /utf-8
     )
 endif()
 
