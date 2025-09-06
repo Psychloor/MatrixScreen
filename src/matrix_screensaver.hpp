@@ -13,21 +13,25 @@
 
 class MatrixRenderer;
 
-enum class ScreensaverMode : std::uint8_t {
+enum class ScreensaverMode : std::uint8_t
+{
     Unknown,
-    Screensaver,    // /s - full screen mode
-    Configure,      // /c - show settings dialog
-    Preview         // /p - preview in a small window
+    Screensaver, // /s - full screen mode
+    Configure,   // /c - show settings dialog
+    Preview      // /p - preview in a small window
 };
 
-struct ScreensaverArgs {
+struct ScreensaverArgs
+{
     ScreensaverMode mode = ScreensaverMode::Unknown;
     HWND previewWindow = nullptr;
 
-    static ScreensaverArgs parse(const int argc, char** argv) {
+    static ScreensaverArgs parse(const int argc, char** argv)
+    {
         ScreensaverArgs args;
 
-        if (argc < 2) {
+        if (argc < 2)
+        {
             // No arguments - default to configure mode
             args.mode = ScreensaverMode::Configure;
             return args;
@@ -36,28 +40,36 @@ struct ScreensaverArgs {
         std::string arg = argv[1]; // NOLINT(*-pro-bounds-pointer-arithmetic)
 
         // Convert to uppercase for comparison
-        for (char& c : arg) {
+        for (char& c : arg)
+        {
             c = std::toupper(c);
         }
 
-        if (arg == "/S" || arg == "-S") {
+        if (arg == "/S" || arg == "-S")
+        {
             args.mode = ScreensaverMode::Screensaver;
         }
-        else if (arg == "/C" || arg == "-C") {
+        else if (arg == "/C" || arg == "-C")
+        {
             args.mode = ScreensaverMode::Configure;
         }
-        else if (arg.starts_with("/P") || arg.starts_with("-P")) {
+        else if (arg.starts_with("/P") || arg.starts_with("-P"))
+        {
             args.mode = ScreensaverMode::Preview;
 
             // Extract preview window handle
-            if (arg.length() > 2) {
+            if (arg.length() > 2)
+            {
                 // Handle "/P:123456" format
                 size_t const colonPos = arg.find(':');
-                if (colonPos != std::string::npos) {
+                if (colonPos != std::string::npos)
+                {
                     std::string const handleStr = arg.substr(colonPos + 1);
                     args.previewWindow = reinterpret_cast<HWND>(std::stoull(handleStr));
                 }
-            } else if (argc > 2) {
+            }
+            else if (argc > 2)
+            {
                 // Handle "/P 123456" format
                 args.previewWindow = reinterpret_cast<HWND>(std::stoull(argv[2]));
             }
@@ -69,20 +81,18 @@ struct ScreensaverArgs {
 
 class MatrixScreensaver
 {
-    public:
+public:
     explicit MatrixScreensaver(ScreensaverMode mode, HWND previewWindow = nullptr);
     ~MatrixScreensaver();
 
-    int run() {
-        switch (mode_) {
-            case ScreensaverMode::Screensaver:
-                return runScreensaver();
-            case ScreensaverMode::Configure:
-                return runConfiguration();
-            case ScreensaverMode::Preview:
-                return runPreview();
-            default:
-                return runConfiguration();
+    int run()
+    {
+        switch (mode_)
+        {
+            case ScreensaverMode::Screensaver: return runScreensaver();
+            case ScreensaverMode::Configure: return runConfiguration();
+            case ScreensaverMode::Preview: return runPreview();
+            default: return runConfiguration();
         }
     }
 
