@@ -17,34 +17,91 @@
 
 // For UTF-16 -> UTF-8 conversion on Windows
 #ifdef _WIN32
-    #include <windows.h>
+#include <windows.h>
 #endif
 
 namespace
 {
     // Character set kept for potential future use (e.g., switching glyphs over time).
     // We don't render text here (SDL_ttf-free); we draw rectangles for speed/compat.
-    constexpr auto MATRIX_CHARS = std::to_array({L"ア", L"イ", L"ウ", L"エ", L"オ",
-        L"カ", L"キ", L"ク", L"ケ", L"コ", L"サ", L"シ", L"ス", L"セ", L"ソ",L"タ", L"チ", L"ツ", L"テ",
-        L"ト", L"ナ", L"ニ", L"ヌ", L"ネ", L"ノ", L"ハ", L"ヒ", L"フ", L"ヘ", L"ホ",L"マ", L"ミ", L"ム",
-        L"メ", L"モ", L"ヤ", L"ユ", L"ヨ", L"ラ", L"リ", L"ル", L"レ", L"ロ", L"ワ", L"ヲ", L"ン",L"0",
-        L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9",L"A",L"B",L"C"});
+    constexpr auto MATRIX_CHARS = std::to_array({L"ア",
+                                                 L"イ",
+                                                 L"ウ",
+                                                 L"エ",
+                                                 L"オ",
+                                                 L"カ",
+                                                 L"キ",
+                                                 L"ク",
+                                                 L"ケ",
+                                                 L"コ",
+                                                 L"サ",
+                                                 L"シ",
+                                                 L"ス",
+                                                 L"セ",
+                                                 L"ソ",
+                                                 L"タ",
+                                                 L"チ",
+                                                 L"ツ",
+                                                 L"テ",
+                                                 L"ト",
+                                                 L"ナ",
+                                                 L"ニ",
+                                                 L"ヌ",
+                                                 L"ネ",
+                                                 L"ノ",
+                                                 L"ハ",
+                                                 L"ヒ",
+                                                 L"フ",
+                                                 L"ヘ",
+                                                 L"ホ",
+                                                 L"マ",
+                                                 L"ミ",
+                                                 L"ム",
+                                                 L"メ",
+                                                 L"モ",
+                                                 L"ヤ",
+                                                 L"ユ",
+                                                 L"ヨ",
+                                                 L"ラ",
+                                                 L"リ",
+                                                 L"ル",
+                                                 L"レ",
+                                                 L"ロ",
+                                                 L"ワ",
+                                                 L"ヲ",
+                                                 L"ン",
+                                                 L"0",
+                                                 L"1",
+                                                 L"2",
+                                                 L"3",
+                                                 L"4",
+                                                 L"5",
+                                                 L"6",
+                                                 L"7",
+                                                 L"8",
+                                                 L"9",
+                                                 L"A",
+                                                 L"B",
+                                                 L"C"});
     constexpr size_t MATRIX_CHARS_SIZE = MATRIX_CHARS.size();
 
     std::string wchar_to_utf8(const wchar_t wc)
     {
-    #ifdef _WIN32
-        wchar_t wbuf[2] = { wc, 0 };
+        #ifdef _WIN32
+        wchar_t wbuf[2] = {wc, 0};
         const int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
-        if (len <= 0) return "?";
+        if (len <= 0)
+            return "?";
         std::string out(static_cast<size_t>(len), '\0');
         WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, out.data(), len, nullptr, nullptr);
-        if (!out.empty() && out.back() == '\0') out.pop_back();
+        if (!out.empty() && out.back() == '\0')
+            out.pop_back();
         return out;
-    #else
-        if (wc < 128) return std::string(1, static_cast<char>(wc));
+        #else
+        if (wc < 128)
+            return std::string(1, static_cast<char>(wc));
         return "?";
-    #endif
+        #endif
     }
 }
 
@@ -86,14 +143,14 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID /*dis
     // Log renderer name to spot per-monitor driver differences
     const char* rname = SDL_GetRendererName(renderer_.get());
     std::cerr << "Renderer created (primary path). Driver=" << (rname ? rname : "(null)")
-              << " bounds=(" << bounds_.x << "," << bounds_.y << "," << bounds_.w << "x" << bounds_.h << ")\n";
+        << " bounds=(" << bounds_.x << "," << bounds_.y << "," << bounds_.w << "x" << bounds_.h << ")\n";
 
     characterDistribution_ = std::uniform_int_distribution<size_t>(0, MATRIX_CHARS_SIZE - 1);
 
     initFontIfPossible(); // sets cellW_/cellH_ and font_ if available
     std::cerr << "Font status (primary path): " << (font_ ? "loaded" : "not loaded, using rectangles") << '\n';
 
-    std::mt19937 gen{ std::random_device{}() };
+    std::mt19937 gen{std::random_device{}()};
     setupStreams(gen);
 
     valid_ = true;
@@ -126,7 +183,7 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow) :
 
     const char* rname = SDL_GetRendererName(renderer_.get());
     std::cerr << "Renderer created (preview path). Driver=" << (rname ? rname : "(null)")
-              << " bounds=(" << bounds_.x << "," << bounds_.y << "," << bounds_.w << "x" << bounds_.h << ")\n";
+        << " bounds=(" << bounds_.x << "," << bounds_.y << "," << bounds_.w << "x" << bounds_.h << ")\n";
 
     SDL_SetWindowAlwaysOnTop(window_.get(), true);
     characterDistribution_ = std::uniform_int_distribution<size_t>(0, MATRIX_CHARS_SIZE - 1);
@@ -134,7 +191,7 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow) :
     initFontIfPossible();
     std::cerr << "Font status (preview path): " << (font_ ? "loaded" : "not loaded, using rectangles") << '\n';
 
-    std::mt19937 gen{ std::random_device{}() };
+    std::mt19937 gen{std::random_device{}()};
     setupStreams(gen);
 
     valid_ = true;
@@ -172,6 +229,30 @@ void MatrixRenderer::initFontIfPossible()
 {
     const int pt = choose_font_pt_for_bounds(bounds_.h);
 
+    // Get renderer information for debugging
+    const char* rendererName = SDL_GetRendererName(renderer_.get());
+    std::string driverName = rendererName ? rendererName : "unknown";
+    std::cerr << "Initializing font for renderer: " << driverName << " pt=" << pt << '\n';
+
+    // Test texture creation capability before loading fonts
+    SDL_Surface* testSurf = SDL_CreateSurface(16, 16, SDL_PIXELFORMAT_RGBA32);
+    if (testSurf)
+    {
+        SDL_Texture* testTex = SDL_CreateTextureFromSurface(renderer_.get(), testSurf);
+        if (!testTex)
+        {
+            std::cerr << "WARNING: Renderer " << driverName << " cannot create basic textures: "
+                << SDL_GetError() << ". Font rendering will be disabled.\n";
+            SDL_DestroySurface(testSurf);
+            font_ = nullptr;
+            cellW_ = 16;
+            cellH_ = 24;
+            return;
+        }
+        SDL_DestroyTexture(testTex);
+        SDL_DestroySurface(testSurf);
+    }
+
     // 1) Try bundled font first
     const char* base = SDL_GetBasePath();
     if (base)
@@ -179,33 +260,56 @@ void MatrixRenderer::initFontIfPossible()
         try
         {
             std::filesystem::path p(base);
-            //SDL_free(base);
             p /= "fonts";
-#ifdef _WIN32
+            #ifdef _WIN32
             p /= "NotoSansCJK-Regular.ttc";
-#else
+            #else
             p /= "NotoSansMonoCJK-Regular.ttc";
-#endif
+            #endif
             if (std::filesystem::exists(p))
             {
-                if (TTF_Font* f = TTF_OpenFont(p.string().c_str(), pt))
+                TTF_Font* f = TTF_OpenFont(p.string().c_str(), pt);
+                if (f)
                 {
-                    font_ = f;
-                    std::cerr << "Loaded bundled font: " << p.string() << " pt=" << pt << '\n';
-
-                    const int lineSkip = TTF_GetFontLineSkip(f);
-                    if (lineSkip > 0)
+                    // Test font rendering capability
+                    SDL_Surface* testGlyph = TTF_RenderText_Blended(f, "A", 0, SDL_Color{255, 255, 255, 255});
+                    if (testGlyph)
                     {
-                        cellH_ = lineSkip;
-                        cellW_ = std::max(12, lineSkip * 2 / 3);
+                        SDL_Texture* testGlyphTex = SDL_CreateTextureFromSurface(renderer_.get(), testGlyph);
+                        if (testGlyphTex)
+                        {
+                            font_ = f;
+                            std::cerr << "Successfully loaded bundled font: " << p.string() << " on renderer " <<
+                                driverName << '\n';
+
+                            const int lineSkip = TTF_GetFontLineSkip(f);
+                            if (lineSkip > 0)
+                            {
+                                cellH_ = lineSkip;
+                                cellW_ = std::max(12, lineSkip * 2 / 3);
+                            }
+                            else
+                            {
+                                cellW_ = 16;
+                                cellH_ = 24;
+                            }
+
+                            SDL_DestroyTexture(testGlyphTex);
+                            SDL_DestroySurface(testGlyph);
+                            return;
+                        }
+                        else
+                        {
+                            std::cerr << "Font glyph texture creation failed on renderer " << driverName
+                                << ": " << SDL_GetError() << '\n';
+                        }
+                        SDL_DestroySurface(testGlyph);
                     }
                     else
                     {
-                        cellW_ = 16;
-                        cellH_ = 24;
-                        std::cerr << "TTF_GetFontLineSkip failed; using defaults. Error: " << SDL_GetError() << '\n';
+                        std::cerr << "Font glyph rendering failed: " << SDL_GetError() << '\n';
                     }
-                    return;
+                    TTF_CloseFont(f);
                 }
                 else
                 {
@@ -213,10 +317,14 @@ void MatrixRenderer::initFontIfPossible()
                 }
             }
         }
-        catch (...) { /* fall through to system fonts */ }
+        catch (...)
+        {
+            std::cerr << "Exception while loading bundled font, trying system fonts\n";
+        }
     }
 
-#ifdef _WIN32
+    // 2) Try system fonts with the same testing approach
+    #ifdef _WIN32
     const char* primaryCandidates[] = {
         "C:/Windows/Fonts/consola.ttf",
         "C:/Windows/Fonts/segoeui.ttf"
@@ -229,7 +337,7 @@ void MatrixRenderer::initFontIfPossible()
         "C:/Windows/Fonts/msgothic.ttc",
         "C:/Windows/Fonts/msmincho.ttc"
     };
-#else
+    #else
     const char* primaryCandidates[] = {
         "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     };
@@ -237,48 +345,61 @@ void MatrixRenderer::initFontIfPossible()
         "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
     };
-#endif
+    #endif
 
     TTF_Font* primary = nullptr;
     for (const char* path : primaryCandidates)
     {
-        if ((primary = TTF_OpenFont(path, pt)))
+        TTF_Font* f = TTF_OpenFont(path, pt);
+        if (f)
         {
-            std::cerr << "Loaded primary system font: " << path << " pt=" << pt << '\n';
-            break;
-        }
-        else
-        {
-            std::cerr << "TTF_OpenFont failed: " << path << " error=" << SDL_GetError() << '\n';
+            // Test rendering capability
+            SDL_Surface* testGlyph = TTF_RenderText_Blended(f, "A", 0, SDL_Color{255, 255, 255, 255});
+            if (testGlyph)
+            {
+                SDL_Texture* testGlyphTex = SDL_CreateTextureFromSurface(renderer_.get(), testGlyph);
+                if (testGlyphTex)
+                {
+                    primary = f;
+                    std::cerr << "Loaded primary system font: " << path << " on renderer " << driverName << '\n';
+                    SDL_DestroyTexture(testGlyphTex);
+                    SDL_DestroySurface(testGlyph);
+                    break;
+                }
+                else
+                {
+                    std::cerr << "Primary font texture creation failed on renderer " << driverName
+                        << " for " << path << ": " << SDL_GetError() << '\n';
+                }
+                SDL_DestroySurface(testGlyph);
+            }
+            TTF_CloseFont(f);
         }
     }
 
     if (!primary)
     {
+        std::cerr << "No compatible primary font found for renderer " << driverName << ". Using rectangles.\n";
         font_ = nullptr;
         cellW_ = 16;
         cellH_ = 24;
-        std::cerr << "No primary font. Falling back to rectangles.\n";
         return;
     }
 
+    // Add CJK fallbacks
     for (const char* path : cjkFallbacks)
     {
         if (TTF_Font* fb = TTF_OpenFont(path, pt))
         {
             if (TTF_AddFallbackFont(primary, fb) == 0)
             {
-                std::cerr << "Added CJK fallback: " << path << " pt=" << pt << '\n';
+                std::cerr << "Added CJK fallback: " << path << " to renderer " << driverName << '\n';
             }
             else
             {
                 std::cerr << "TTF_AddFallbackFont failed for: " << path << " error=" << SDL_GetError() << '\n';
                 TTF_CloseFont(fb);
             }
-        }
-        else
-        {
-            std::cerr << "TTF_OpenFont fallback failed: " << path << " error=" << SDL_GetError() << '\n';
         }
     }
 
@@ -296,6 +417,9 @@ void MatrixRenderer::initFontIfPossible()
         cellH_ = 24;
         std::cerr << "TTF_GetFontLineSkip failed; using defaults. Error: " << SDL_GetError() << '\n';
     }
+
+    std::cerr << "Font initialization complete for renderer " << driverName
+        << " - cellW=" << cellW_ << " cellH=" << cellH_ << '\n';
 }
 
 // Render a single codepoint as a texture, with explicit format normalization.
@@ -306,9 +430,9 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
         return SdlTexturePtr(nullptr, SDL_DestroyTexture);
     }
 
-    // Convert the single codepoint to UTF-8 text (SDL3_ttf text API is stable).
-#ifdef _WIN32
-    wchar_t wbuf[2] = { ch, 0 };
+    // Convert the single codepoint to UTF-8 text
+    #ifdef _WIN32
+    wchar_t wbuf[2] = {ch, 0};
     int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
     if (len <= 0)
     {
@@ -317,40 +441,80 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
     }
     std::string u8(static_cast<size_t>(len), '\0');
     WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, u8.data(), len, nullptr, nullptr);
-    if (!u8.empty() && u8.back() == '\0') u8.pop_back();
-#else
+    if (!u8.empty() && u8.back() == '\0')
+        u8.pop_back();
+    #else
     std::string u8 = (ch < 128) ? std::string(1, static_cast<char>(ch)) : std::string("?");
-#endif
+    #endif
 
     // 1) Render text to an SDL_Surface via SDL3_ttf
-    SDL_Surface* surf = TTF_RenderText_Blended(static_cast<TTF_Font*>(font_), u8.c_str(), 0, SDL_Color{255, 255, 255, 255});
+    SDL_Surface* surf = TTF_RenderText_Blended(static_cast<TTF_Font*>(font_), u8.c_str(), 0,
+                                               SDL_Color{255, 255, 255, 255});
     if (!surf)
     {
         std::cerr << "TTF_RenderText_Blended failed for '" << u8 << "': " << SDL_GetError() << '\n';
         return SdlTexturePtr(nullptr, SDL_DestroyTexture);
     }
 
-    // 2) Normalize to a texture-friendly format (fixes D3D11 picky paths)
-    SDL_Surface* conv = SDL_ConvertSurface(surf, SDL_PIXELFORMAT_RGBA32);
+    // 2) Get renderer info to determine best texture format
+    const char* rendererName = SDL_GetRendererName(renderer_.get());
+    std::string driverName = rendererName ? rendererName : "unknown";
+
+    // Choose format based on renderer type for maximum compatibility
+    SDL_PixelFormat targetFormat;
+    if (driverName.find("direct3d") != std::string::npos || driverName.find("d3d") != std::string::npos)
+    {
+        // D3D11/D3D12 prefers BGRA format
+        targetFormat = SDL_PIXELFORMAT_BGRA32;
+    }
+    else
+    {
+        // OpenGL and others work best with RGBA
+        targetFormat = SDL_PIXELFORMAT_RGBA32;
+    }
+
+    // 3) Convert surface to renderer-appropriate format
+    SDL_Surface* conv = SDL_ConvertSurface(surf, targetFormat);
     if (!conv)
     {
-        std::cerr << "SDL_ConvertSurfaceFormat to RGBA32 failed: " << SDL_GetError() << '\n';
-        SDL_DestroySurface(surf);
-        return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+        std::cerr << "SDL_ConvertSurface failed for format " << SDL_GetPixelFormatName(targetFormat)
+            << " on renderer " << driverName << ": " << SDL_GetError() << '\n';
+
+        // Fallback: try the other format
+        SDL_PixelFormat fallbackFormat = (targetFormat == SDL_PIXELFORMAT_BGRA32)
+            ? SDL_PIXELFORMAT_RGBA32
+            : SDL_PIXELFORMAT_BGRA32;
+        conv = SDL_ConvertSurface(surf, fallbackFormat);
+
+        if (!conv)
+        {
+            std::cerr << "SDL_ConvertSurface fallback also failed: " << SDL_GetError() << '\n';
+            SDL_DestroySurface(surf);
+            return SdlTexturePtr(nullptr, SDL_DestroyTexture);
+        }
+        else
+        {
+            std::cerr << "Successfully used fallback format " << SDL_GetPixelFormatName(fallbackFormat) << '\n';
+        }
     }
     SDL_DestroySurface(surf);
 
-    // 3) Create a texture from the normalized surface
+    // 4) Create texture from the converted surface
     SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer_.get(), conv);
     if (!tex)
     {
-        std::cerr << "SDL_CreateTextureFromSurface failed (RGBA32): " << SDL_GetError() << '\n';
+        std::cerr << "SDL_CreateTextureFromSurface failed on renderer " << driverName
+            << ": " << SDL_GetError() << '\n';
         SDL_DestroySurface(conv);
         return SdlTexturePtr(nullptr, SDL_DestroyTexture);
     }
     SDL_DestroySurface(conv);
 
     SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+
+    // Log successful texture creation for debugging
+    std::cerr << "Successfully created glyph texture for '" << u8 << "' on renderer " << driverName << '\n';
+
     return SdlTexturePtr(tex, SDL_DestroyTexture);
 }
 
@@ -372,7 +536,7 @@ void MatrixRenderer::setupStreams(std::mt19937& gen)
         for (int i = 0; i < s.length; ++i)
         {
             const size_t idx = characterDistribution_(gen);
-            s.chars[static_cast<size_t>(i)] = MatrixCharacter{ MATRIX_CHARS[idx][0], static_cast<float>(i) };
+            s.chars[static_cast<size_t>(i)] = MatrixCharacter{MATRIX_CHARS[idx][0], static_cast<float>(i)};
         }
 
         streams_.emplace_back(std::move(s));
@@ -382,7 +546,8 @@ void MatrixRenderer::setupStreams(std::mt19937& gen)
 SDL_Texture* MatrixRenderer::getGlyphTexture(wchar_t ch, SDL_Color color)
 {
     // Cache by character only; color is applied with SDL_SetTextureColorMod/SDL_SetTextureAlphaMod when rendering.
-    if (auto it = glyphCache_.find(ch); it != glyphCache_.end() && it->second)
+    if (auto it = glyphCache_.find(ch);
+        it != glyphCache_.end() && it->second)
     {
         return it->second.get();
     }
@@ -439,8 +604,13 @@ void MatrixRenderer::render()
     SDL_SetRenderDrawColor(renderer_.get(), 0, 0, 0, 255);
     SDL_RenderClear(renderer_.get());
 
-    auto head_color = []() -> SDL_Color { return SDL_Color{200, 255, 200, 255}; };
-    auto tail_color = [](float t) -> SDL_Color { // t in [0,1]
+    auto head_color = []() -> SDL_Color
+    {
+        return SDL_Color{200, 255, 200, 255};
+    };
+    auto tail_color = [](float t) -> SDL_Color
+    {
+        // t in [0,1]
         const Uint8 g = static_cast<Uint8>(std::clamp(40.0f + 215.0f * t, 40.0f, 255.0f));
         const Uint8 a = static_cast<Uint8>(std::clamp(32.0f + 223.0f * t, 32.0f, 255.0f));
         return SDL_Color{0, g, 0, a};
@@ -454,7 +624,8 @@ void MatrixRenderer::render()
         for (int i = 0; i < s.length; ++i)
         {
             const float yPos = s.y - static_cast<float>(i * cellH_);
-            if (yPos < -cellH_ || yPos > bounds_.h) continue;
+            if (yPos < -cellH_ || yPos > bounds_.h)
+                continue;
 
             const bool isHead = (i == 0);
             const float t = 1.0f - static_cast<float>(i) / static_cast<float>(std::max(1, s.length - 1));
@@ -484,10 +655,10 @@ void MatrixRenderer::render()
             else
             {
                 SDL_SetRenderDrawColor(renderer_.get(), color.r, color.g, color.b, color.a);
-                SDL_FRect rect{ static_cast<float>(x),
-                                yPos,
-                                static_cast<float>(cellW_ - 1),
-                                static_cast<float>(cellH_ - 1) };
+                SDL_FRect rect{static_cast<float>(x),
+                               yPos,
+                               static_cast<float>(cellW_ - 1),
+                               static_cast<float>(cellH_ - 1)};
                 SDL_RenderFillRect(renderer_.get(), &rect);
             }
         }
@@ -504,24 +675,35 @@ bool MatrixRenderer::isValid() const
 }
 
 MatrixRenderer::MatrixRenderer(MatrixRenderer&& other) noexcept :
-    valid_(other.valid_),
-    bounds_(other.bounds_),
-    characterDistribution_(other.characterDistribution_),
-    window_(std::move(other.window_)),
-    renderer_(std::move(other.renderer_)),
-    cellW_(other.cellW_),
-    cellH_(other.cellH_),
-    cols_(other.cols_),
-    streams_(std::move(other.streams_)),
-    speedDist_(other.speedDist_),
-    lengthDist_(other.lengthDist_),
-    font_(nullptr)
-{}
+valid_(other.valid_),
+bounds_(other.bounds_),
+characterDistribution_(other.characterDistribution_),
+window_(std::move(other.window_)),
+renderer_(std::move(other.renderer_)),
+cellW_(other.cellW_),
+cellH_(other.cellH_),
+cols_(other.cols_),
+streams_(std::move(other.streams_)),
+speedDist_(other.speedDist_),
+lengthDist_(other.lengthDist_),
+font_(other.font_),
+glyphCache_(std::move(other.glyphCache_))
+{    // Clear the moved-from object
+    other.font_ = nullptr;
+    other.valid_ = false;}
 
 MatrixRenderer& MatrixRenderer::operator=(MatrixRenderer&& other) noexcept
 {
     if (this == &other) return *this;
 
+    // Clean up existing resources
+    glyphCache_.clear();
+    if (font_ != nullptr)
+    {
+        TTF_CloseFont(static_cast<TTF_Font*>(font_));
+    }
+
+    // Move all members
     valid_ = other.valid_;
     bounds_ = other.bounds_;
     characterDistribution_ = other.characterDistribution_;
@@ -533,7 +715,12 @@ MatrixRenderer& MatrixRenderer::operator=(MatrixRenderer&& other) noexcept
     streams_ = std::move(other.streams_);
     speedDist_ = other.speedDist_;
     lengthDist_ = other.lengthDist_;
-    font_ = nullptr;
-    glyphCache_.clear();
+    font_ = other.font_;
+    glyphCache_ = std::move(other.glyphCache_);
+
+    // Clear the moved-from object
+    other.font_ = nullptr;
+    other.valid_ = false;
+
     return *this;
 }
