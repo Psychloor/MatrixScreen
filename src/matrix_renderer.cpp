@@ -557,7 +557,7 @@ void MatrixRenderer::update(const double deltaTime, std::mt19937& gen)
         const float tailHeightPx = static_cast<float>(s.length * cellH_);
         if (s.y - tailHeightPx > static_cast<float>(bounds_.h))
         {
-            // Respawn above top with new length & speed
+            // Respawn above top with new length and speed
             s.speed = speedDist_(gen);
             s.length = lengthDist_(gen);
             s.y = -static_cast<float>(std::uniform_int_distribution<int>(0, bounds_.h)(gen));
@@ -573,7 +573,7 @@ void MatrixRenderer::update(const double deltaTime, std::mt19937& gen)
         else
         {
             // Occasionally flicker a character to add variety
-            if (std::uniform_int_distribution(0, 7)(gen) == 0 && !s.chars.empty())
+            if (std::uniform_int_distribution(0, 400)(gen) == 0 && !s.chars.empty())
             {
                 const int pos = std::uniform_int_distribution(0, std::max(0, s.length - 1))(gen);
                 const size_t idx = characterDistribution_(gen);
