@@ -112,6 +112,7 @@ private:
     HWND previewWindow_ = nullptr;
     std::vector<MatrixRenderer> renderers_;
     bool running_ = true;
+    size_t maxHertz_ = 1;
 };
 
 

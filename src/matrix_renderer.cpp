@@ -88,7 +88,7 @@ namespace
     std::string wchar_to_utf8(const wchar_t wc)
     {
         #ifdef _WIN32
-        wchar_t wbuf[2] = {wc, 0};
+        const wchar_t wbuf[2] = {wc, 0};
         const int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
         if (len <= 0)
             return "?";
@@ -211,26 +211,25 @@ MatrixRenderer::~MatrixRenderer()
 
 // Helper: choose a per-monitor font size based on window height.
 // Aim for about 50 rows; clamp to a sane range.
-static int choose_font_pt_for_bounds(int height_px)
+static int ChooseFontPtForBounds(const int height_px)
 {
-    const int rows = 50; // tune to taste (40..60)
-    const int target_cell_h = std::max(12, height_px / rows);
+    static constexpr int ROWS = 50; // tune to taste (40..60)
+    const int targetCellH = std::max(12, height_px / ROWS);
     // Use target cell height directly as a point-size heuristic (works well in practice).
-    return std::clamp(target_cell_h, 12, 64);
+    return std::clamp(targetCellH, 12, 64);
 }
 
 void MatrixRenderer::initFontIfPossible()
 {
-    const int pt = choose_font_pt_for_bounds(bounds_.h);
+    const int pt = ChooseFontPtForBounds(bounds_.h);
 
     // Get renderer information for debugging
     const char* rendererName = SDL_GetRendererName(renderer_.get());
-    std::string driverName = rendererName ? rendererName : "unknown";
+    const std::string driverName = rendererName ? rendererName : "unknown";
     std::cerr << "Initializing font for renderer: " << driverName << " pt=" << pt << '\n';
 
     // Test texture creation capability before loading fonts
-    SDL_Surface* testSurf = SDL_CreateSurface(16, 16, SDL_PIXELFORMAT_RGBA32);
-    if (testSurf)
+    if (SDL_Surface* testSurf = SDL_CreateSurface(16, 16, SDL_PIXELFORMAT_RGBA32))
     {
         SDL_Texture* testTex = SDL_CreateTextureFromSurface(renderer_.get(), testSurf);
         if (!testTex)
@@ -248,8 +247,7 @@ void MatrixRenderer::initFontIfPossible()
     }
 
     // 1) Try bundled font first
-    const char* base = SDL_GetBasePath();
-    if (base)
+    if (const char* base = SDL_GetBasePath())
     {
         try
         {
@@ -266,11 +264,9 @@ void MatrixRenderer::initFontIfPossible()
                 if (f)
                 {
                     // Test font rendering capability
-                    SDL_Surface* testGlyph = TTF_RenderText_Blended(f, "A", 0, SDL_Color{255, 255, 255, 255});
-                    if (testGlyph)
+                    if (SDL_Surface* testGlyph = TTF_RenderText_Blended(f, "A", 0, SDL_Color{255, 255, 255, 255}))
                     {
-                        SDL_Texture* testGlyphTex = SDL_CreateTextureFromSurface(renderer_.get(), testGlyph);
-                        if (testGlyphTex)
+                        if (SDL_Texture* testGlyphTex = SDL_CreateTextureFromSurface(renderer_.get(), testGlyph))
                         {
                             font_ = f;
                             std::cerr << "Successfully loaded bundled font: " << p.string() << " on renderer " <<
@@ -348,11 +344,9 @@ void MatrixRenderer::initFontIfPossible()
         if (f)
         {
             // Test rendering capability
-            SDL_Surface* testGlyph = TTF_RenderText_Blended(f, "A", 0, SDL_Color{255, 255, 255, 255});
-            if (testGlyph)
+            if (SDL_Surface* testGlyph = TTF_RenderText_Blended(f, "A", 0, SDL_Color{255, 255, 255, 255}))
             {
-                SDL_Texture* testGlyphTex = SDL_CreateTextureFromSurface(renderer_.get(), testGlyph);
-                if (testGlyphTex)
+                if (SDL_Texture* testGlyphTex = SDL_CreateTextureFromSurface(renderer_.get(), testGlyph))
                 {
                     primary = f;
                     std::cerr << "Loaded primary system font: " << path << " on renderer " << driverName << '\n';
@@ -417,7 +411,7 @@ void MatrixRenderer::initFontIfPossible()
 }
 
 // Render a single codepoint as a texture, with explicit format normalization.
-SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/)
+SdlTexturePtr MatrixRenderer::renderGlyphTexture(const wchar_t ch, SDL_Color /*color*/) const
 {
     if (font_ == nullptr)
     {
@@ -426,8 +420,8 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
 
     // Convert the single codepoint to UTF-8 text
     #ifdef _WIN32
-    wchar_t wbuf[2] = {ch, 0};
-    int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
+    const wchar_t wbuf[2] = {ch, 0};
+    const int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
     if (len <= 0)
     {
         std::cerr << "WideCharToMultiByte failed for wchar: " << static_cast<unsigned>(ch) << '\n';
@@ -452,7 +446,7 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
 
     // 2) Get renderer info to determine best texture format
     const char* rendererName = SDL_GetRendererName(renderer_.get());
-    std::string driverName = rendererName ? rendererName : "unknown";
+    const std::string driverName = rendererName ? rendererName : "unknown";
 
     // Choose format based on renderer type for maximum compatibility
     SDL_PixelFormat targetFormat;
@@ -475,7 +469,7 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(wchar_t ch, SDL_Color /*color*/
             << " on renderer " << driverName << ": " << SDL_GetError() << '\n';
 
         // Fallback: try the other format
-        SDL_PixelFormat fallbackFormat = (targetFormat == SDL_PIXELFORMAT_BGRA32)
+        const SDL_PixelFormat fallbackFormat = (targetFormat == SDL_PIXELFORMAT_BGRA32)
             ? SDL_PIXELFORMAT_RGBA32
             : SDL_PIXELFORMAT_BGRA32;
         conv = SDL_ConvertSurface(surf, fallbackFormat);
@@ -536,7 +530,7 @@ void MatrixRenderer::setupStreams(std::mt19937& gen)
 SDL_Texture* MatrixRenderer::getGlyphTexture(wchar_t ch, SDL_Color color)
 {
     // Cache by character only; color is applied with SDL_SetTextureColorMod/SDL_SetTextureAlphaMod when rendering.
-    if (auto it = glyphCache_.find(ch);
+    if (const auto it = glyphCache_.find(ch);
         it != glyphCache_.end() && it->second)
     {
         return it->second.get();
@@ -548,13 +542,13 @@ SDL_Texture* MatrixRenderer::getGlyphTexture(wchar_t ch, SDL_Color color)
     {
         glyphCache_.emplace(ch, std::move(texture));
     }
-    return texPtr;
 
+    return texPtr;
 }
 
 // Update and render
 
-void MatrixRenderer::update(double deltaTime, std::mt19937& gen)
+void MatrixRenderer::update(const double deltaTime, std::mt19937& gen)
 {
     for (auto& s : streams_)
     {
@@ -579,9 +573,9 @@ void MatrixRenderer::update(double deltaTime, std::mt19937& gen)
         else
         {
             // Occasionally flicker a character to add variety
-            if (std::uniform_int_distribution<int>(0, 7)(gen) == 0 && !s.chars.empty())
+            if (std::uniform_int_distribution(0, 7)(gen) == 0 && !s.chars.empty())
             {
-                const int pos = std::uniform_int_distribution<int>(0, std::max(0, s.length - 1))(gen);
+                const int pos = std::uniform_int_distribution(0, std::max(0, s.length - 1))(gen);
                 const size_t idx = characterDistribution_(gen);
                 s.chars[static_cast<size_t>(pos)].character = MATRIX_CHARS[idx][0];
             }
@@ -594,11 +588,11 @@ void MatrixRenderer::render()
     SDL_SetRenderDrawColor(renderer_.get(), 0, 0, 0, 255);
     SDL_RenderClear(renderer_.get());
 
-    auto head_color = []() -> SDL_Color
+    auto headColor = []() -> SDL_Color
     {
         return SDL_Color{200, 255, 200, 255};
     };
-    auto tail_color = [](float t) -> SDL_Color
+    auto tailColor = [](const float t) -> SDL_Color
     {
         // t in [0,1]
         const Uint8 g = static_cast<Uint8>(std::clamp(40.0f + 215.0f * t, 40.0f, 255.0f));
@@ -619,12 +613,11 @@ void MatrixRenderer::render()
 
             const bool isHead = (i == 0);
             const float t = 1.0f - static_cast<float>(i) / static_cast<float>(std::max(1, s.length - 1));
-            const SDL_Color color = isHead ? head_color() : tail_color(t);
+            const SDL_Color color = isHead ? headColor() : tailColor(t);
 
             if (font_ != nullptr)
             {
-                SDL_Texture* tex = getGlyphTexture(s.chars[static_cast<size_t>(i)].character, color);
-                if (tex)
+                if (SDL_Texture* tex = getGlyphTexture(s.chars[static_cast<size_t>(i)].character, color))
                 {
                     // SDL3: SDL_GetTextureSize returns floats
                     float tw = 0.0f, th = 0.0f;

@@ -22,12 +22,13 @@ namespace
     // 16 should be random enough compared to `std::mt19937::state_size` 624
     constexpr size_t RANDOM_SEED_SIZE = 16; // NOLINT(*-avoid-magic-numbers)
 
-    constexpr double FPS = 60.0F;
+    // 1000 Herts should be enough for now
+    constexpr double FPS = 1'000.0F;
     constexpr double TIMESTEP = 1.0F / FPS;
 }
 
 
-MatrixScreensaver::MatrixScreensaver(const ScreensaverMode mode, HWND previewWindow) :
+MatrixScreensaver::MatrixScreensaver(const ScreensaverMode mode, const HWND previewWindow) :
     mode_(mode), previewWindow_(previewWindow)
 {}
 
@@ -141,9 +142,7 @@ int MatrixScreensaver::mainLoop()
         {
             switch (event.type)
             {
-                case SDL_EVENT_QUIT: running_ = false;
-                    break;
-
+                case SDL_EVENT_QUIT: [[fallthrough]];
                 case SDL_EVENT_KEY_DOWN: [[fallthrough]];
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: running_ = false;
                     break;
@@ -163,7 +162,7 @@ int MatrixScreensaver::mainLoop()
         const double deltaTime = (currentTime - lastTime) / frequency;
         lastTime = currentTime;
 
-        accumulator += std::min(deltaTime, 0.25); // NOLINT(*-avoid-magic-numbers)
+       accumulator += std::min(deltaTime, 0.25); // NOLINT(*-avoid-magic-numbers)
         while (accumulator >= TIMESTEP)
         {
             accumulator -= TIMESTEP;
@@ -177,6 +176,8 @@ int MatrixScreensaver::mainLoop()
         {
             renderer.render();
         }
+
+        SDL_DelayNS(1);
     }
 
     return EXIT_SUCCESS;

@@ -76,7 +76,7 @@ private:
     // Helpers
     void initFontIfPossible();
     void setupStreams(std::mt19937& gen);
-    SdlTexturePtr renderGlyphTexture(wchar_t ch, SDL_Color color);
+    SdlTexturePtr renderGlyphTexture(wchar_t ch, SDL_Color color) const;
     SDL_Texture* getGlyphTexture(wchar_t ch, SDL_Color color);
 };
 
