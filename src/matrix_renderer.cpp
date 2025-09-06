@@ -11,7 +11,7 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displ
     window_{nullptr, SDL_DestroyWindow},
     renderer_{nullptr, SDL_DestroyRenderer}
 {
-    SDL_PropertiesID props = SDL_CreateProperties();
+    const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, bounds.w);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, bounds.h);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, bounds.x);
@@ -24,17 +24,6 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displ
     if (!window_)
     {
         std::cerr << "SDL_CreateWindow failed: " << SDL_GetError() << '\n' << std::flush;
-        return;
-    }
-
-    if (!SDL_SetWindowPosition(window_.get(), bounds.x, bounds.y))
-    {
-        std::cerr << "SDL_SetWindowPosition failed: " << SDL_GetError() << '\n' << std::flush;
-        return;
-    }
-    if (!SDL_SetWindowSize(window_.get(), bounds.w, bounds.h))
-    {
-        std::cerr << "SDL_SetWindowSize failed: " << SDL_GetError() << '\n' << std::flush;
         return;
     }
 
