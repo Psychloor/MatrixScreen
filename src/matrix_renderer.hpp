@@ -1,9 +1,7 @@
 ﻿#ifndef MATRIXSCREENSAVER_MATRIX_RENDERER_HPP
 #define MATRIXSCREENSAVER_MATRIX_RENDERER_HPP
 
-#include <iostream>
 #include <memory>
-#include <ostream>
 
 #include <SDL3/SDL.h>
 

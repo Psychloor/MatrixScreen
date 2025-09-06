@@ -4,6 +4,8 @@
 
 #include "matrix_renderer.hpp"
 
+#include <iostream>
+
 MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID displayId) :
     window_{nullptr, SDL_DestroyWindow},
     renderer_{nullptr, SDL_DestroyRenderer}
