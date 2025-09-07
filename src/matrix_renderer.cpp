@@ -84,25 +84,6 @@ namespace
                                                  L"B",
                                                  L"C"});
     constexpr size_t MATRIX_CHARS_SIZE = MATRIX_CHARS.size();
-
-    std::string wchar_to_utf8(const wchar_t wc)
-    {
-        #ifdef _WIN32
-        const wchar_t wbuf[2] = {wc, 0};
-        const int len = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
-        if (len <= 0)
-            return "?";
-        std::string out(static_cast<size_t>(len), '\0');
-        WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, out.data(), len, nullptr, nullptr);
-        if (!out.empty() && out.back() == '\0')
-            out.pop_back();
-        return out;
-        #else
-        if (wc < 128)
-            return std::string(1, static_cast<char>(wc));
-        return "?";
-        #endif
-    }
 }
 
 // Constructors
