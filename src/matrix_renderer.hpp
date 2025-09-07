@@ -10,6 +10,7 @@
 
 #include "matrix_screensaver.hpp"
 
+// ReSharper disable once CppInconsistentNaming
 struct TTF_Font;
 
 using SdlWindowPtr = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
@@ -59,16 +60,16 @@ private:
     };
 
     // Grid / layout
-    int cellW_ = 16;
-    int cellH_ = 24;
+    int cellW_ = 16; // NOLINT(*-avoid-magic-numbers)
+    int cellH_ = 24; // NOLINT(*-avoid-magic-numbers)
     int cols_ = 0;
 
     // Streams (one per column)
     std::vector<Stream> streams_;
 
     // Distributions
-    std::uniform_real_distribution<float> speedDist_{120.0f, 280.0f}; // pixels/sec
-    std::uniform_int_distribution<> lengthDist_{8, 16};
+    std::uniform_real_distribution<float> speedDist_{120.0F, 280.0F}; // pixels/sec NOLINT(*-avoid-magic-numbers)
+    std::uniform_int_distribution<> lengthDist_{8, 16}; // NOLINT(*-avoid-magic-numbers)
 
     // Glyph cache (created on demand); null when font not available
     TTF_Font* font_ = nullptr;
@@ -77,8 +78,8 @@ private:
     // Helpers
     void initFontIfPossible();
     void setupStreams(std::mt19937& gen);
-    SdlTexturePtr renderGlyphTexture(wchar_t ch, SDL_Color color) const;
-    SDL_Texture* getGlyphTexture(wchar_t ch, SDL_Color color);
+    [[nodiscard]] SdlTexturePtr renderGlyphTexture(wchar_t ch, SDL_Color color) const;
+    SDL_Texture* getGlyphTexture(wchar_t ch);
 };
 
 #endif //MATRIXSCREENSAVER_MATRIX_RENDERER_HPP

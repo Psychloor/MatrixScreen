@@ -18,8 +18,8 @@
 
 namespace
 {
-    constinit float MOUSE_THRESHOLD = 10.0F; // NOLINT(*-avoid-magic-numbers)
-    constinit size_t RANDOM_SEED_SIZE = std::mt19937::state_size; // NOLINT(*-avoid-magic-numbers)
+    constexpr float MOUSE_THRESHOLD = 10.0F; // NOLINT(*-avoid-magic-numbers)
+    constexpr size_t RANDOM_SEED_SIZE = std::mt19937::state_size; // NOLINT(*-avoid-magic-numbers)
 
     // 1000 Herts should be enough for now
     constexpr double FPS = 1'000.0F;
@@ -27,7 +27,7 @@ namespace
 }
 
 
-MatrixScreensaver::MatrixScreensaver(const ScreensaverMode mode, const HWND previewWindow) :
+MatrixScreensaver::MatrixScreensaver(const ScreensaverMode mode, const HWND previewWindow) : // NOLINT(*-misplaced-const)
     mode_(mode), previewWindow_(previewWindow)
 {}
 
@@ -178,7 +178,7 @@ int MatrixScreensaver::mainLoop()
             renderer.render();
         }
 
-        SDL_DelayNS(1);
+        SDL_DelayNS(100); // NOLINT(*-avoid-magic-numbers)
     }
 
     return EXIT_SUCCESS;
