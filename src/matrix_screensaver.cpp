@@ -18,7 +18,7 @@
 
 namespace
 {
-    constexpr float MOUSE_THRESHOLD = 10.0F; // NOLINT(*-avoid-magic-numbers)
+    constexpr float MOUSE_THRESHOLD = 10.0F;                      // NOLINT(*-avoid-magic-numbers)
     constexpr size_t RANDOM_SEED_SIZE = std::mt19937::state_size; // NOLINT(*-avoid-magic-numbers)
 
     // 1000 Herts should be enough for now
@@ -148,8 +148,8 @@ int MatrixScreensaver::mainLoop()
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: running_ = false;
                     break;
 
-                case SDL_EVENT_MOUSE_MOTION: if (std::abs(event.motion.xrel) >= MOUSE_THRESHOLD || std::abs(
-                        event.motion.yrel) >= MOUSE_THRESHOLD)
+                case SDL_EVENT_MOUSE_MOTION: if (std::abs(event.motion.xrel) >= MOUSE_THRESHOLD
+                        || std::abs(event.motion.yrel) >= MOUSE_THRESHOLD)
                     {
                         running_ = false;
                     }
@@ -163,7 +163,7 @@ int MatrixScreensaver::mainLoop()
         const double deltaTime = (currentTime - lastTime) / frequency;
         lastTime = currentTime;
 
-       accumulator += std::min(deltaTime, 0.25); // NOLINT(*-avoid-magic-numbers)
+        accumulator += std::min(deltaTime, 0.25); // NOLINT(*-avoid-magic-numbers)
         while (accumulator >= TIMESTEP)
         {
             accumulator -= TIMESTEP;

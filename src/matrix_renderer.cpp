@@ -376,7 +376,7 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(const wchar_t ch, SDL_Color /*c
 
     // Convert the single codepoint to UTF-8 text
     #ifdef _WIN32
-    std::array<wchar_t, 2> const wbuf = {ch, 0};
+    const std::array<wchar_t, 2> wbuf = {ch, 0};
     const int len = WideCharToMultiByte(CP_UTF8, 0, wbuf.data(), -1, nullptr, 0, nullptr, nullptr);
     if (len <= 0)
     {
@@ -609,8 +609,6 @@ void MatrixRenderer::render()
 
     SDL_RenderPresent(renderer_.get());
 }
-
-// Identity/validity moves
 
 bool MatrixRenderer::isValid() const
 {
