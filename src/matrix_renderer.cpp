@@ -1,16 +1,12 @@
-﻿//
-// Created by blomq on 2025-09-06.
-//
+﻿#include "matrix_renderer.hpp"
 
-#include "matrix_renderer.hpp"
-
+#include <algorithm>
 #include <array>
+#include <filesystem>
 #include <iostream>
 #include <random>
 #include <string>
 #include <string_view>
-#include <algorithm> // for std::clamp
-#include <filesystem> // add this include for path join/logging
 
 // SDL3_ttf
 #include <SDL3_ttf/SDL_ttf.h>
@@ -417,7 +413,7 @@ SdlTexturePtr MatrixRenderer::renderGlyphTexture(const wchar_t ch, SDL_Color /*c
     #endif
 
     // 1) Render text to an SDL_Surface via SDL3_ttf
-    SDL_Surface* surf = TTF_RenderText_Blended(static_cast<TTF_Font*>(font_), u8.c_str(), 0,
+    SDL_Surface* surf = TTF_RenderText_Blended(font_, u8.c_str(), 0,
                                                SDL_Color{255, 255, 255, 255});
     if (!surf)
     {
@@ -667,7 +663,7 @@ MatrixRenderer& MatrixRenderer::operator=(MatrixRenderer&& other) noexcept
     glyphCache_.clear();
     if (font_ != nullptr)
     {
-        TTF_CloseFont(static_cast<TTF_Font*>(font_));
+        TTF_CloseFont(font_);
     }
 
     // Move all members

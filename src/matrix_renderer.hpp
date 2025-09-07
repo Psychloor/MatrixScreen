@@ -3,13 +3,14 @@
 
 #include <memory>
 #include <random>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-// SDL
 #include <SDL3/SDL.h>
 
 #include "matrix_screensaver.hpp"
+
+struct TTF_Font;
 
 using SdlWindowPtr = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 using SdlRendererPtr = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)>;
@@ -67,10 +68,10 @@ private:
 
     // Distributions
     std::uniform_real_distribution<float> speedDist_{120.0f, 280.0f}; // pixels/sec
-    std::uniform_int_distribution<int> lengthDist_{8, 22};
+    std::uniform_int_distribution<> lengthDist_{8, 16};
 
     // Glyph cache (created on demand); null when font not available
-    void* font_ = nullptr; // TTF_Font*, kept void* to avoid header coupling
+    TTF_Font* font_ = nullptr;
     std::unordered_map<wchar_t, SdlTexturePtr> glyphCache_;
 
     // Helpers
