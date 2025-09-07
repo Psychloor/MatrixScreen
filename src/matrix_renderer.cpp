@@ -83,6 +83,31 @@ namespace
 }
 
 // Constructors
+SDL_Window* CreateSdlWindowFromHwnd(const HWND hwnd)
+{
+    if (!hwnd) return nullptr;
+
+    // Query the client size to set width/height
+    RECT rc{};
+    GetClientRect(hwnd, &rc);
+    const int w = rc.right - rc.left;
+    const int h = rc.bottom - rc.top;
+
+    SDL_PropertiesID props = SDL_CreateProperties();
+    if (!props) return nullptr;
+
+    SDL_SetPointerProperty(props, SDL_PROP_WINDOW_CREATE_WIN32_HWND_POINTER, hwnd);
+
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, w);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, h);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, SDL_WINDOW_BORDERLESS);
+
+    SDL_Window* win = SDL_CreateWindowWithProperties(props);
+    SDL_DestroyProperties(props);
+
+    return win;
+}
+
 
 MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, const SDL_DisplayID /*displayId*/) :
     bounds_(bounds),
@@ -142,7 +167,12 @@ MatrixRenderer::MatrixRenderer(const SDL_Rect& bounds, HWND previewWindow) :
         return;
     }
 
-    SDL_Window* parentWindow = SDL_GetWindowFromID(reinterpret_cast<SDL_WindowID>(previewWindow));
+    SDL_Window* parentWindow = CreateSdlWindowFromHwnd(previewWindow);
+    if (!parentWindow)
+    {
+        std::cerr << "CreateSDLWindowFromHWND failed: " << SDL_GetError() << '\n' << std::flush;
+        return;
+    }
     SDL_SetWindowParent(window_.get(), parentWindow);
     SDL_ShowWindow(window_.get());
 
