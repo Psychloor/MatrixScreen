@@ -18,9 +18,8 @@
 
 namespace
 {
-    constexpr float MOUSE_THRESHOLD = 10.0F; // NOLINT(*-avoid-magic-numbers)
-    // 16 should be random enough compared to `std::mt19937::state_size` 624
-    constexpr size_t RANDOM_SEED_SIZE = 16; // NOLINT(*-avoid-magic-numbers)
+    constinit float MOUSE_THRESHOLD = 10.0F; // NOLINT(*-avoid-magic-numbers)
+    constinit size_t RANDOM_SEED_SIZE = std::mt19937::state_size; // NOLINT(*-avoid-magic-numbers)
 
     // 1000 Herts should be enough for now
     constexpr double FPS = 1'000.0F;
