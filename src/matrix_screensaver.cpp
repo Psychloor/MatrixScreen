@@ -33,6 +33,8 @@ MatrixScreensaver::MatrixScreensaver(const ScreensaverMode mode, const HWND prev
 
 MatrixScreensaver::~MatrixScreensaver()
 {
+    renderers_.clear();
+    TTF_Quit();
     SDL_Quit();
 }
 
